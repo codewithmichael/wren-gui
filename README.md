@@ -18,7 +18,14 @@ Basic features include:
 
 ## Installation
 
-Clone or extract anywhere and run via `sudo wren-gui` (requires root permissions).
+To download and install Wren GUI on a running Wren instance:
+
+* **Simple:** Clone or extract anywhere and run `sudo ./wren-gui` from within the project directory.
+* **Full Installation:** Copy and paste the following (long and ugly) command into a terminal and press enter (assumes Ubuntu):
+  * `pushd /opt && wget https://github.com/trynd/wren-gui/archive/master.tar.gz -O - | sudo tar xz && sudo mv wren-gui-master wren-gui && sudo ln -sf /opt/wren-gui/wren-gui /usr/local/sbin/wren-gui && popd`
+  * The above command extracts the latest version of Wren GUI to the `/opt/wren-gui` directory and creates a symbolic link to the application in `usr/local/sbin`
+  * Once it's installed you can start Wren GUI from a terminal at any time with the command `sudo wren-gui`
+
 
 ### Requirements
 
