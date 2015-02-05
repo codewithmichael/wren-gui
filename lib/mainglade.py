@@ -254,9 +254,9 @@ class MainGlade:
                                  'RAM free ON TOP OF your existing save size '
                                  'to perform this operation, otherwise a '
                                  'memory overflow and system deadlock could '
-                                 'occur. See "Available memory after save '
-                                 'size" at the bottom of the main display to '
-                                 'verify this value.')
+                                 'occur. See "Available memory after active '
+                                 'data limit" at the bottom of the main '
+                                 'display to verify this value.')
     response = dialog.run()
 
     if response == Gtk.ResponseType.OK:
