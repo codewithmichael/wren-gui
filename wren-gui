@@ -36,6 +36,8 @@
 from gi.repository import Gtk, GObject
 from lib.usage import MemoryUsage, DiskUsage
 from lib.mainglade import MainGlade
+from lib.pipechain import PipeChain
+from lib.paths import PATH_PLATFORMUTIL_SH
 
 # update interval (in seconds)
 UPDATE_TIME = 2
@@ -54,8 +56,15 @@ class Main:
 
   def update_usage(self):
     # take system readings and display stats
-    self.main_glade.set_usage(memory_usage=MemoryUsage(),
-                              disk_usage=DiskUsage())
+    memory_usage = MemoryUsage()
+    disk_usage = DiskUsage()
+    uncompressed_save_bytes = \
+      PipeChain([[PATH_PLATFORMUTIL_SH,'getuncompressedsavesize']])\
+      .output.strip()
+
+    self.main_glade.set_usage(memory_usage=memory_usage,
+                              disk_usage=disk_usage,
+                              uncompressed_save_bytes=uncompressed_save_bytes)
 
   def timeout_callback(self):
     # populate stats

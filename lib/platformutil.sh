@@ -45,6 +45,7 @@ test x"$RUN_ENV_PLATFORM_NAME" = x \
 
 
 # Define paths
+path_active_save="/mnt/$RUN_ENV_PLATFORM_NAME/04-save"
 path_grub_config="/mnt/$RUN_ENV_PLATFORM_NAME/00-device/boot/grub/grub.cfg"
 bin_save="/etc/$RUN_ENV_PLATFORM_NAME/save.sh"
 bin_updategrub="/etc/$RUN_ENV_PLATFORM_NAME/update-grub.sh"
@@ -77,74 +78,79 @@ updateBootOptions || errorExit
 # handle requested action
 case "$operation" in
 
-  getsavename )         # return the appropriate save name for saving
-                        if test x"$BOOT_SAVE" != x; then
-                          echo "$BOOT_SAVE"
-                        elif test x"$PLATFORM_DEFAULT_SAVE" != x; then
-                          echo "$PLATFORM_DEFAULT_SAVE"
-                        else
-                          errorExit "Unable to determine save name"
-                        fi
-                        ;;
+  getsavename )             # return the appropriate save name for saving
+                            if test x"$BOOT_SAVE" != x; then
+                              echo "$BOOT_SAVE"
+                            elif test x"$PLATFORM_DEFAULT_SAVE" != x; then
+                              echo "$PLATFORM_DEFAULT_SAVE"
+                            else
+                              errorExit "Unable to determine save name"
+                            fi
+                            ;;
 
-  getsavenames )        # return all existing save names
-                        path_dir_saves=`getDeviceSavesDirectoryPath` \
-                          && test x"$path_dir_saves" != x \
-                          || errorExit "Unable to determine device save storage directory"
-                        if test -d "$path_dir_saves"; then
-                          saves=`getAbsoluteDirectoryList "$path_dir_saves"` \
-                            || errorExit "Unable to load save storage directory content"
-                          while IFS= read -r i; do
-                            test -d "$i" && echo `basename "$i"`
-                          done <<EOF
+  getsavenames )            # return all existing save names
+                            path_dir_saves=`getDeviceSavesDirectoryPath` \
+                              && test x"$path_dir_saves" != x \
+                              || errorExit "Unable to determine device save storage directory"
+                            if test -d "$path_dir_saves"; then
+                              saves=`getAbsoluteDirectoryList "$path_dir_saves"` \
+                                || errorExit "Unable to load save storage directory content"
+                              while IFS= read -r i; do
+                                test -d "$i" && echo `basename "$i"`
+                              done <<EOF
 $saves
 EOF
-                        fi
-                        ;;
+                            fi
+                            ;;
 
-  increasesavesize )    # increase the active save data size in memory
-                        $bin_increasesavesize || exit $?
-                        ;;
+  getuncompressedsavesize ) # return the uncompressed file size of the active save data
+                            du -xa -B1 -d0 "$path_active_save" | cut -f1 \
+                              || errorExit "Unable to determine uncompressed save size"
+                            ;;
 
-  save )                # save to disk using the provided save name
-                        test x"$2" != x \
-                          && save_name="$2" \
-                          || errorExit "Save name required"
-                        $bin_save -s "$save_name" || exit $?
-                        ;;
+  increasesavesize )        # increase the active save data size in memory
+                            $bin_increasesavesize || exit $?
+                            ;;
 
-  viewgrubconfig )      # view current grub configuration
-                        test -f "$path_grub_config" \
-                          && cat "$path_grub_config" \
-                          || errorExit "Grub configuration file not found"
-                        ;;
+  save )                    # save to disk using the provided save name
+                            test x"$2" != x \
+                              && save_name="$2" \
+                              || errorExit "Save name required"
+                            $bin_save -s "$save_name" || exit $?
+                            ;;
 
-  previewgrubconfig )   # preview an updated grub configuration
-                        $bin_updategrub || exit $?
-                        ;;
+  viewgrubconfig )          # view current grub configuration
+                            test -f "$path_grub_config" \
+                              && cat "$path_grub_config" \
+                              || errorExit "Grub configuration file not found"
+                            ;;
 
-  updategrub )          # update the current grub configuration
-                        echo "Verifying Grub configuration directory..."
-                        dir_grub_config=`dirname "$path_grub_config"` \
-                          && test -d "$dir_grub_config" \
-                          || errorExit "Grub configuration directory not found"
-                        echo "Generating updated Grub configuration..."
-                        updated_grub_config=`$bin_updategrub` \
-                          || errorExit "Unable to generate updated Grub configuration"
-                        if test -f "$path_grub_config"; then
-                          echo "Backing up current Grub configuration..."
-                          echo "- Copying to: $path_grub_config~"
-                          cp "$path_grub_config" "$path_grub_config~" \
-                            || errorExit "Unable to copy to: $path_grub_config~"
-                        fi
-                        echo "Updating Grub configuration..."
-                        echo "- Writing to: $path_grub_config"
-                        echo "$updated_grub_config" >"$path_grub_config" \
-                          || errorExit "Error writing to file: $path_grub_config"
-                        echo "Done."
-                        ;;
+  previewgrubconfig )       # preview an updated grub configuration
+                            $bin_updategrub || exit $?
+                            ;;
 
-  * )                   # fail (invalid operation)
-                        errorExit "Invalid operation requested: \"$operation\""
-                        ;;
+  updategrub )              # update the current grub configuration
+                            echo "Verifying Grub configuration directory..."
+                            dir_grub_config=`dirname "$path_grub_config"` \
+                              && test -d "$dir_grub_config" \
+                              || errorExit "Grub configuration directory not found"
+                            echo "Generating updated Grub configuration..."
+                            updated_grub_config=`$bin_updategrub` \
+                              || errorExit "Unable to generate updated Grub configuration"
+                            if test -f "$path_grub_config"; then
+                              echo "Backing up current Grub configuration..."
+                              echo "- Copying to: $path_grub_config~"
+                              cp "$path_grub_config" "$path_grub_config~" \
+                                || errorExit "Unable to copy to: $path_grub_config~"
+                            fi
+                            echo "Updating Grub configuration..."
+                            echo "- Writing to: $path_grub_config"
+                            echo "$updated_grub_config" >"$path_grub_config" \
+                              || errorExit "Error writing to file: $path_grub_config"
+                            echo "Done."
+                            ;;
+
+  * )                       # fail (invalid operation)
+                            errorExit "Invalid operation requested: \"$operation\""
+                            ;;
 esac

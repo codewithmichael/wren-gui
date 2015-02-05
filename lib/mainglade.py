@@ -62,6 +62,9 @@ class MainGlade:
         label_name = 'label_%s_%s' % (i, j)
         setattr(self, label_name, builder.get_object(label_name))
 
+    # reference "uncompressed save" label
+    self.label_uncompressed_save=builder.get_object('label_uncompressed_save')
+
     # reference "memory free after save" label (for updates)
     self.label_memory_free_after_save = \
       builder.get_object('label_memory_free_after_save')
@@ -109,13 +112,18 @@ class MainGlade:
 
   ### METHODS
 
-  def set_usage(self, memory_usage=None, disk_usage=None):
-    # update memory stats
-    if memory_usage != None:
-      self.set_memory_usage(memory_usage)
+  def set_usage(self, memory_usage=None, disk_usage=None,
+                uncompressed_save_bytes=None):
+
     # update disk stats
     if disk_usage != None:
       self.set_disk_usage(disk_usage)
+    # update uncompressed save
+    if (uncompressed_save_bytes != None):
+      self.set_disk_uncompressed_save(uncompressed_save_bytes)
+    # update memory stats
+    if memory_usage != None:
+      self.set_memory_usage(memory_usage)
     # update memory free after save
     if memory_usage != None and disk_usage != None:
       self.set_memory_free_after_save(memory_usage.total.free,
@@ -182,6 +190,14 @@ class MainGlade:
       pass
     self._set_label_bytes(self.label_save_free,  usage_result.free,
                           tooltip=tooltip, color=color)
+
+  def set_disk_uncompressed_save(self, uncompressed_save_bytes):
+    try:
+      self._set_label_bytes(self.label_uncompressed_save,
+                            long(uncompressed_save_bytes))
+      
+    except ValueError:
+      self._set_label_bytes(self.label_uncompressed_save, '')
 
   def set_memory_free_after_save(self, memory_free_bytes, save_free_bytes):
     enable_menu_increase_save_size = False
