@@ -252,7 +252,7 @@ class MainGlade:
                                  "\n\n"
                                  'Note that you MUST have at least 1 GiB of '
                                  'RAM free ON TOP OF your existing active data '
-                                 'to perform this operation, otherwise a '
+                                 'limit to perform this operation, otherwise a '
                                  'memory overflow and system deadlock could '
                                  'occur. See "Available memory after active '
                                  'data limit" at the bottom of the main '
