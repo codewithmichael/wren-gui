@@ -104,7 +104,7 @@ EOF
                             ;;
 
   getuncompressedsavesize ) # return the uncompressed file size of the active save data
-                            du -xa -B1 -d0 "$path_active_save" | cut -f1 \
+                            du -a -B1 -d0 "$path_active_save" | cut -f1 \
                               || errorExit "Unable to determine uncompressed save size"
                             ;;
 
